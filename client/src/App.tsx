@@ -1,6 +1,32 @@
-import { useSession, signOut } from "@/lib/auth-client.ts";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useSession } from "@/lib/auth-client.ts";
 import { LoginPage } from "@/pages/LoginPage.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import { DashboardPage } from "@/pages/DashboardPage.tsx";
+import { UsersPage } from "@/pages/UsersPage.tsx";
+import { NavBar } from "@/components/NavBar.tsx";
+import { RequireRole } from "@/components/RequireRole.tsx";
+
+function AuthenticatedLayout() {
+  return (
+    <div className="min-h-screen bg-background">
+      <NavBar />
+      <main className="px-6 py-6">
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/users"
+            element={
+              <RequireRole role="admin">
+                <UsersPage />
+              </RequireRole>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
 
 export function App() {
   const { data: session, isPending } = useSession();
@@ -13,26 +39,9 @@ export function App() {
     );
   }
 
-  if (!session) {
-    return <LoginPage />;
-  }
-
   return (
-    <div className="min-h-screen bg-background px-6 py-4">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Helpdesk</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            {session.user.name} ({session.user.email})
-          </span>
-          <Button variant="outline" size="sm" onClick={() => signOut()}>
-            Sign out
-          </Button>
-        </div>
-      </header>
-      <p className="mt-8 text-muted-foreground">
-        Welcome back. Tickets coming soon.
-      </p>
-    </div>
+    <BrowserRouter>
+      {session ? <AuthenticatedLayout /> : <LoginPage />}
+    </BrowserRouter>
   );
 }

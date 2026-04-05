@@ -6,7 +6,7 @@ Monorepo helpdesk app: `client/` (React + Vite), `server/` (Express 5), `shared/
 
 - **Runtime**: Bun (package manager + server runtime). Prisma CLI requires Node 22 (`nvm use 22`).
 - **Server**: Express 5, Prisma 7, PostgreSQL (port 5433 via Docker)
-- **Client**: React 19, Vite 6, react-hook-form, shadcn/ui (Tailwind CSS 4)
+- **Client**: React 19, Vite 6, React Router 7, react-hook-form + Zod, shadcn/ui (Tailwind CSS 4)
 - **Auth**: Better Auth with email/password (sign-up disabled), database sessions, Prisma adapter
 - **Types**: Shared workspace package (`shared/`) for cross-boundary types
 
@@ -37,33 +37,51 @@ bun prisma/seed.ts                  # seed admin user
 - Auth handler mounted **before** `express.json()` in `server/src/index.ts` (Better Auth parses its own body).
 - Express 5 route: `app.all("/api/auth/*splat", ...)` — must use `*splat` not `*`.
 - `requireAuth` middleware: `server/src/middleware/auth.ts`
+- `requireAdmin` middleware: chains after `requireAuth`, returns 403 for non-admin users
 - Default admin: `admin@helpdesk.com` / `admin123`
+
+## Routing & Authorization
+
+- **Client routing**: React Router (`BrowserRouter`) in `App.tsx`. Authenticated users see `NavBar` + routed pages; unauthenticated users see `LoginPage`.
+- **Role-based routes**: `RequireRole` component wraps routes that need a specific role (redirects to `/` otherwise).
+- **Nav visibility**: `NavBar` conditionally renders links based on `session.user.role` (e.g., Users link is admin-only).
+- **Server protection**: Admin-only API routes use `requireAuth` + `requireAdmin` middleware chain.
+- **Better Auth `role` field**: Custom field on user, not included in Better Auth's default session type. Access via cast: `(session.user as { role?: string }).role`.
+- **Form validation**: Login uses Zod schema via `@hookform/resolvers/zod`. Import Zod as `zod/v4`.
 
 ## Project Structure
 
 ```
 client/src/
-  components/ui/        # shadcn/ui components (Button, Input, Label, Card)
-  lib/auth-client.ts    # Better Auth React client
-  lib/utils.ts          # cn() utility for Tailwind class merging
-  pages/LoginPage.tsx   # Sign-in form (react-hook-form + shadcn)
-  App.tsx               # Session-gated root component
-  index.css             # Tailwind CSS + theme variables
+  components/
+    ui/                   # shadcn/ui components (Button, Input, Label, Card)
+    NavBar.tsx            # Top nav bar (admin-only links gated by role)
+    RequireRole.tsx       # Route guard — redirects if role doesn't match
+  lib/auth-client.ts      # Better Auth React client
+  lib/utils.ts            # cn() utility for Tailwind class merging
+  pages/
+    LoginPage.tsx         # Sign-in form (Zod + react-hook-form + shadcn)
+    DashboardPage.tsx     # Dashboard (placeholder)
+    UsersPage.tsx         # User management (admin-only, placeholder)
+  App.tsx                 # BrowserRouter + session-gated routing
+  index.css               # Tailwind CSS + theme variables
 
 server/src/
-  lib/auth.ts           # Better Auth server config
-  lib/db.ts             # Prisma client
-  middleware/auth.ts     # requireAuth Express middleware
-  types/express.d.ts    # Request type augmentation (user/session)
-  routes/health.ts      # Health check endpoint
-  index.ts              # Express app entry
+  lib/auth.ts             # Better Auth server config
+  lib/db.ts               # Prisma client
+  middleware/auth.ts       # requireAuth + requireAdmin Express middleware
+  types/express.d.ts      # Request type augmentation (user/session)
+  routes/
+    health.ts             # Health check endpoint
+    users.ts              # GET /api/users (admin-only)
+  index.ts                # Express app entry
 
 server/prisma/
-  schema.prisma         # User, Session, Account, Verification, Ticket, TicketMessage
-  seed.ts               # Admin user seeder (uses Better Auth API)
+  schema.prisma           # User, Session, Account, Verification, Ticket, TicketMessage
+  seed.ts                 # Admin user seeder (uses Better Auth API)
 
 shared/src/
-  index.ts              # Shared TypeScript interfaces
+  index.ts                # Shared TypeScript interfaces
 ```
 
 ## Environment Variables

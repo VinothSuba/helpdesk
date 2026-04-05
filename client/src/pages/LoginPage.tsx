@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod/v4";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "@/lib/auth-client.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -12,10 +14,12 @@ import {
   CardTitle,
 } from "@/components/ui/card.tsx";
 
-interface LoginFormData {
-  email: string;
-  password: string;
-}
+const loginSchema = z.object({
+  email: z.email("Enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +29,7 @@ export function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
@@ -54,7 +59,7 @@ export function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="admin@helpdesk.com"
-                {...register("email", { required: "Email is required" })}
+                {...register("email")}
               />
               {errors.email && (
                 <p className="text-xs text-destructive">{errors.email.message}</p>
@@ -66,7 +71,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                {...register("password", { required: "Password is required" })}
+                {...register("password")}
               />
               {errors.password && (
                 <p className="text-xs text-destructive">{errors.password.message}</p>

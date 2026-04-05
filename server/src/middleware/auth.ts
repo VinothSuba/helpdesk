@@ -19,3 +19,15 @@ export async function requireAuth(
   req.session = session.session;
   next();
 }
+
+export async function requireAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (!req.user || req.user.role !== "admin") {
+    res.status(403).json({ error: { message: "Forbidden", code: "FORBIDDEN" } });
+    return;
+  }
+  next();
+}
