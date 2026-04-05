@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { signIn } from "../lib/auth-client.ts";
+import { signIn } from "@/lib/auth-client.ts";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card.tsx";
 
 interface LoginFormData {
   email: string;
@@ -20,7 +30,6 @@ export function LoginPage() {
 
   async function onSubmit(data: LoginFormData) {
     setError(null);
-
     const result = await signIn.email({
       email: data.email,
       password: data.password,
@@ -31,127 +40,51 @@ export function LoginPage() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Helpdesk</h1>
-        <h2 style={styles.subtitle}>Sign in</h2>
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle className="text-xl">Helpdesk</CardTitle>
+          <CardDescription>Sign in to your account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@helpdesk.com"
+                {...register("email", { required: "Email is required" })}
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
+            </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={styles.form}>
-          <div style={styles.field}>
-            <label htmlFor="email" style={styles.label}>Email</label>
-            <input
-              id="email"
-              type="email"
-              style={styles.input}
-              {...register("email", {
-                required: "Email is required",
-              })}
-            />
-            {errors.email && (
-              <span style={styles.error}>{errors.email.message}</span>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                {...register("password", { required: "Password is required" })}
+              />
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password.message}</p>
+              )}
+            </div>
+
+            {error && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+                {error}
+              </p>
             )}
-          </div>
 
-          <div style={styles.field}>
-            <label htmlFor="password" style={styles.label}>Password</label>
-            <input
-              id="password"
-              type="password"
-              style={styles.input}
-              {...register("password", {
-                required: "Password is required",
-              })}
-            />
-            {errors.password && (
-              <span style={styles.error}>{errors.password.message}</span>
-            )}
-          </div>
-
-          {error && <div style={styles.serverError}>{error}</div>}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            style={styles.button}
-          >
-            {isSubmitting ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-      </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    padding: "2rem",
-    width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-  },
-  title: {
-    margin: "0 0 0.25rem",
-    fontSize: "1.5rem",
-    textAlign: "center",
-  },
-  subtitle: {
-    margin: "0 0 1.5rem",
-    fontSize: "1rem",
-    fontWeight: 400,
-    color: "#666",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.25rem",
-  },
-  label: {
-    fontSize: "0.875rem",
-    fontWeight: 500,
-  },
-  input: {
-    padding: "0.5rem 0.75rem",
-    border: "1px solid #d1d5db",
-    borderRadius: "6px",
-    fontSize: "0.875rem",
-    outline: "none",
-  },
-  error: {
-    color: "#dc2626",
-    fontSize: "0.75rem",
-  },
-  serverError: {
-    color: "#dc2626",
-    fontSize: "0.875rem",
-    textAlign: "center",
-    padding: "0.5rem",
-    backgroundColor: "#fef2f2",
-    borderRadius: "6px",
-  },
-  button: {
-    padding: "0.625rem",
-    backgroundColor: "#111",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    cursor: "pointer",
-  },
-};

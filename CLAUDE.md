@@ -6,7 +6,7 @@ Monorepo helpdesk app: `client/` (React + Vite), `server/` (Express 5), `shared/
 
 - **Runtime**: Bun (package manager + server runtime). Prisma CLI requires Node 22 (`nvm use 22`).
 - **Server**: Express 5, Prisma 7, PostgreSQL (port 5433 via Docker)
-- **Client**: React 19, Vite 6, react-hook-form
+- **Client**: React 19, Vite 6, react-hook-form, shadcn/ui (Tailwind CSS 4)
 - **Auth**: Better Auth with email/password (sign-up disabled), database sessions, Prisma adapter
 - **Types**: Shared workspace package (`shared/`) for cross-boundary types
 
@@ -43,9 +43,12 @@ bun prisma/seed.ts                  # seed admin user
 
 ```
 client/src/
+  components/ui/        # shadcn/ui components (Button, Input, Label, Card)
   lib/auth-client.ts    # Better Auth React client
-  pages/LoginPage.tsx   # Sign-in form (react-hook-form)
+  lib/utils.ts          # cn() utility for Tailwind class merging
+  pages/LoginPage.tsx   # Sign-in form (react-hook-form + shadcn)
   App.tsx               # Session-gated root component
+  index.css             # Tailwind CSS + theme variables
 
 server/src/
   lib/auth.ts           # Better Auth server config

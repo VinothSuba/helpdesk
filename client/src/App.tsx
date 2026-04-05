@@ -1,13 +1,14 @@
-import { useSession, signOut } from "./lib/auth-client.ts";
-import { LoginPage } from "./pages/LoginPage.tsx";
+import { useSession, signOut } from "@/lib/auth-client.ts";
+import { LoginPage } from "@/pages/LoginPage.tsx";
+import { Button } from "@/components/ui/button.tsx";
 
 export function App() {
   const { data: session, isPending } = useSession();
 
   if (isPending) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", marginTop: "4rem" }}>
-        <p>Loading...</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -17,27 +18,21 @@ export function App() {
   }
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "system-ui, sans-serif" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ margin: 0 }}>Helpdesk</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span>{session.user.name} ({session.user.email})</span>
-          <button
-            onClick={() => signOut()}
-            style={{
-              padding: "0.5rem 1rem",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              background: "#fff",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-            }}
-          >
+    <div className="min-h-screen bg-background px-6 py-4">
+      <header className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Helpdesk</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">
+            {session.user.name} ({session.user.email})
+          </span>
+          <Button variant="outline" size="sm" onClick={() => signOut()}>
             Sign out
-          </button>
+          </Button>
         </div>
       </header>
-      <p style={{ color: "#666", marginTop: "2rem" }}>Welcome back. Tickets coming soon.</p>
+      <p className="mt-8 text-muted-foreground">
+        Welcome back. Tickets coming soon.
+      </p>
     </div>
   );
 }
