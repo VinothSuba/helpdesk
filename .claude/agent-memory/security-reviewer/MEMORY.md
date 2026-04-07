@@ -1,0 +1,2 @@
+- [Auth config](auth_config.md) -- Better Auth setup patterns, secret handling, session config
+- [Security posture](security_posture.md) -- Baseline security gaps identified in initial review
