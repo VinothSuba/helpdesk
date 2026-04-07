@@ -26,19 +26,21 @@ nvm use 22                          # required for Prisma CLI
 npx prisma migrate dev --name <name>
 npx prisma generate
 npx prisma db push                  # sync schema without migration
-bun prisma/seed.ts                  # seed admin user
+SEED_ADMIN_PASSWORD=... SEED_AGENT_PASSWORD=... bun prisma/seed.ts  # seed users
 ```
 
 ## Auth
 
-- Better Auth config: `server/src/lib/auth.ts`
+- Better Auth config: `server/src/lib/auth.ts` (validates `BETTER_AUTH_SECRET` at startup, fails if missing or < 32 chars)
 - Client auth: `client/src/lib/auth-client.ts`
 - Sign-up is disabled (`disableSignUp: true`). Users are created via seed or admin API.
 - Auth handler mounted **before** `express.json()` in `server/src/index.ts` (Better Auth parses its own body).
 - Express 5 route: `app.all("/api/auth/*splat", ...)` — must use `*splat` not `*`.
 - `requireAuth` middleware: `server/src/middleware/auth.ts`
 - `requireAdmin` middleware: chains after `requireAuth`, returns 403 for non-admin users
-- Default admin: `admin@helpdesk.com` / `admin123`
+- Auth endpoints are rate-limited (20 requests per 15 min window via `express-rate-limit`).
+- Default admin: `admin@helpdesk.com` (password set via `SEED_ADMIN_PASSWORD` env var)
+- Default agent: `agent@helpdesk.com` (password set via `SEED_AGENT_PASSWORD` env var)
 
 ## Routing & Authorization
 
@@ -93,4 +95,12 @@ Server `.env` (gitignored):
 | `PORT` | Server port (default 3001) |
 | `CLIENT_URL` | CORS origin (default http://localhost:5173) |
 | `DATABASE_URL` | PostgreSQL connection string |
-| `BETTER_AUTH_SECRET` | Session signing secret (generate: `openssl rand -base64 32`) |
+| `BETTER_AUTH_SECRET` | Session signing secret, min 32 chars (generate: `openssl rand -base64 32`) |
+| `SEED_ADMIN_PASSWORD` | Admin password for seed script |
+| `SEED_AGENT_PASSWORD` | Agent password for seed script |
+
+Client `.env` (gitignored):
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_API_URL` | Server URL (default http://localhost:3001) |

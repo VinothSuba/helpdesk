@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.ts";
 import { healthRouter } from "./routes/health.ts";
@@ -14,8 +15,16 @@ app.use(cors({
   credentials: true,
 }));
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: { message: "Too many attempts", code: "RATE_LIMITED" } },
+});
+
 const authHandler = toNodeHandler(auth);
-app.all("/api/auth/*splat", (req, res) => authHandler(req, res));
+app.all("/api/auth/*splat", authLimiter, (req, res) => authHandler(req, res));
 
 app.use(express.json());
 
