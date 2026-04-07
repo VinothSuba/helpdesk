@@ -6,6 +6,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const db = new PrismaClient({ adapter });
 
 async function seed() {
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  const agentPassword = process.env.SEED_AGENT_PASSWORD;
+  if (!adminPassword || !agentPassword) {
+    throw new Error(
+      "SEED_ADMIN_PASSWORD and SEED_AGENT_PASSWORD must be set",
+    );
+  }
+
   const { betterAuth } = await import("better-auth");
   const { prismaAdapter } = await import("better-auth/adapters/prisma");
 
@@ -34,7 +42,7 @@ async function seed() {
     const ctx = await auth.api.signUpEmail({
       body: {
         email: "admin@helpdesk.com",
-        password: "admin123",
+        password: adminPassword,
         name: "Admin",
       },
     });
@@ -57,7 +65,7 @@ async function seed() {
     await auth.api.signUpEmail({
       body: {
         email: "agent@helpdesk.com",
-        password: "agent123",
+        password: agentPassword,
         name: "Agent",
       },
     });

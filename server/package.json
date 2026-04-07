@@ -21,6 +21,7 @@
     "cors": "2.8.5",
     "dotenv": "^17.4.0",
     "express": "5.1.0",
+    "express-rate-limit": "^8.3.2",
     "prisma": "^7.6.0",
     "shared": "workspace:*"
   },
