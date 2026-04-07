@@ -9,6 +9,7 @@
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
+    "types": ["vite/client"],
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "jsx": "react-jsx",
