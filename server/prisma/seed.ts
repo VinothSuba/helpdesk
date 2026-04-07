@@ -6,15 +6,6 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const db = new PrismaClient({ adapter });
 
 async function seed() {
-  const existingAdmin = await db.user.findFirst({
-    where: { role: "admin" },
-  });
-
-  if (existingAdmin) {
-    console.log("Admin user already exists, skipping seed.");
-    return;
-  }
-
   const { betterAuth } = await import("better-auth");
   const { prismaAdapter } = await import("better-auth/adapters/prisma");
 
@@ -35,20 +26,45 @@ async function seed() {
     },
   });
 
-  const ctx = await auth.api.signUpEmail({
-    body: {
-      email: "admin@helpdesk.com",
-      password: "admin123",
-      name: "Admin",
-    },
+  const existingAdmin = await db.user.findFirst({
+    where: { role: "admin" },
   });
 
-  await db.user.update({
-    where: { id: ctx.user.id },
-    data: { role: "admin" },
+  if (!existingAdmin) {
+    const ctx = await auth.api.signUpEmail({
+      body: {
+        email: "admin@helpdesk.com",
+        password: "admin123",
+        name: "Admin",
+      },
+    });
+
+    await db.user.update({
+      where: { id: ctx.user.id },
+      data: { role: "admin" },
+    });
+
+    console.log("Default admin created: admin@helpdesk.com");
+  } else {
+    console.log("Admin user already exists, skipping.");
+  }
+
+  const existingAgent = await db.user.findFirst({
+    where: { email: "agent@helpdesk.com" },
   });
 
-  console.log(`Default admin created: admin@helpdesk.com`);
+  if (!existingAgent) {
+    await auth.api.signUpEmail({
+      body: {
+        email: "agent@helpdesk.com",
+        password: "agent123",
+        name: "Agent",
+      },
+    });
+    console.log("Default agent created: agent@helpdesk.com");
+  } else {
+    console.log("Agent user already exists, skipping.");
+  }
 }
 
 seed()
