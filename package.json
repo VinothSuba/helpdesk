@@ -5,11 +5,16 @@
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "dev:server": "bun run --filter server dev",
-    "dev:client": "bun run --filter client dev"
+    "dev:client": "bun run --filter client dev",
+    "test:e2e": "docker compose up postgres-test -d && bunx playwright test",
+    "test:e2e:ui": "docker compose up postgres-test -d && bunx playwright test --ui",
+    "test:e2e:headed": "docker compose up postgres-test -d && bunx playwright test --headed"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@rollup/rollup-darwin-x64": "^4.60.1",
     "better-auth": "^1.5.6",
+    "dotenv": "^17.4.1",
     "server": "workspace:*"
   }
 }

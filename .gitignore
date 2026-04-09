@@ -3,3 +3,8 @@ dist/
 .env
 .env.local
 *.log
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
